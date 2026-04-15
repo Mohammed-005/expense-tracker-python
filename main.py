@@ -34,16 +34,29 @@ class Manager:
         self.save_data()
 
     def get_transactions(self):
-        return self.transactions
+        return self.transactions.copy()
 
     def search_transactions(self,category):
+        keyword = category.lower().strip()
         search_results = []
 
         for transaction in self.transactions:
-            if transaction.category.lower() == category.lower():
+            if keyword in transaction.category.lower():
                 search_results.append(transaction)
 
         return search_results
+
+    def sort_transactions(self, order):
+        copied_list = self.transactions.copy()
+
+        if order.lower() in ["asc", "ascending"]:
+            copied_list.sort(key=lambda t: t.amount)
+        elif order.lower() in ["desc", "descending"]:
+            copied_list.sort(key=lambda t: t.amount, reverse=True)
+        else:
+            return copied_list
+
+        return copied_list
 
     def net_balance(self):
         total_income: float = 0
@@ -101,15 +114,13 @@ def get_valid_type():
     while True:
         transaction_type = input("Enter transaction type (1.Income, 2.Expense): ").lower()
 
-        if transaction_type == "1":
+        if transaction_type in ["1", "income"]:
             return "income"
-        elif transaction_type == "2":
+        elif transaction_type in ["2", "expense"]:
             return "expense"
-
-        if transaction_type not in ["income", "expense","1","2"]:
-            print("Transaction type must be either 'Income' or 'Expense'")
+        else:
+            print("Invalid transaction type")
             continue
-        return transaction_type
 
 def get_valid_choice(prompt, min_value = None, max_value = None):
     while True:
@@ -142,10 +153,11 @@ def main():
         print("3. Search transactions")
         print("4. Net balance")
         print("5. Delete transaction")
-        print("6. Clear transactions")
-        print("7. Exit")
+        print("6. Sort transactions")
+        print("7. Clear transactions")
+        print("8. Exit")
 
-        choice = get_valid_choice("Enter your choice: ", min_value = 1, max_value = 7)
+        choice = get_valid_choice("Enter your choice: ", min_value = 1, max_value = 8)
 
         if choice == 1:
             category = input("Enter the category: ")
@@ -178,11 +190,11 @@ def main():
 
             display_header()
 
-            for transaction in result:
+            for i, transaction in enumerate(result, start=1):
+                print(f"{i:<5}", end="")
                 transaction.show()
 
             print("-" * 60)
-
 
         elif choice == 4:
             total_income, total_expense, net_balance = manager.net_balance()
@@ -213,11 +225,22 @@ def main():
                 print("Invalid selection!")
 
         elif choice == 6:
+            order = input("Enter sorting order → 'asc' (low to high) or 'desc' (high to low): ")
+            sorted_list = manager.sort_transactions(order)
+
+            display_header()
+            for i, transaction in enumerate(sorted_list, start=1):
+                print(f"{i:<5}", end="")
+                transaction.show()
+
+            print("-" * 60)
+
+        elif choice == 7:
             confirm = input("Are you sure you want to clear the data? (y/n): ").lower()
             if confirm == "y":
                 manager.clear_data()
 
-        elif choice == 7:
+        elif choice == 8:
             print("Thank you for your time!")
             break
 
