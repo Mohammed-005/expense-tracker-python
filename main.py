@@ -80,6 +80,25 @@ class Manager:
         self.save_data()
         return True
 
+    def category_summary(self):
+        summary = {}
+
+        for transaction in self.transactions:
+            category = transaction.category.lower()
+
+            if category not in summary:
+                summary[category] = {
+                    "income" : 0,
+                    "expense" : 0,
+                }
+            if transaction.type == "income":
+                summary[category]["income"] += transaction.amount
+            elif transaction.type == "expense":
+                summary[category]["expense"] += transaction.amount
+
+        return summary
+
+
     def load_data(self):
         try:
             with open("transactions.json", "r", encoding="utf-8") as file:
