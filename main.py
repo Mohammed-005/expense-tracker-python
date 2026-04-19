@@ -80,7 +80,7 @@ class Manager:
         self.save_data()
         return True
 
-    def category_summary(self):
+    def get_category_summary(self):
         summary = {}
 
         for transaction in self.transactions:
@@ -173,10 +173,11 @@ def main():
         print("4. Net balance")
         print("5. Delete transaction")
         print("6. Sort transactions")
-        print("7. Clear transactions")
-        print("8. Exit")
+        print("7. Category summary")
+        print("8. Clear transactions")
+        print("9. Exit")
 
-        choice = get_valid_choice("Enter your choice: ", min_value = 1, max_value = 8)
+        choice = get_valid_choice("Enter your choice: ", min_value = 1, max_value = 9)
 
         if choice == 1:
             category = input("Enter the category: ")
@@ -255,11 +256,26 @@ def main():
             print("-" * 60)
 
         elif choice == 7:
+            summary = manager.get_category_summary()
+
+            if not summary:
+                print("No transactions found!")
+                continue
+
+            print("-" * 60)
+            print(f"{'Category':<20}{'Income':>15}{'Expense':>15}")
+            print("-" * 60)
+
+            for category, data in summary.items():
+                print(f"{category:<20}{data['income']:>15.2f}{data['expense']:>15.2f}")
+            print("-" * 60)
+
+        elif choice == 8:
             confirm = input("Are you sure you want to clear the data? (y/n): ").lower()
             if confirm == "y":
                 manager.clear_data()
 
-        elif choice == 8:
+        elif choice == 9:
             print("Thank you for your time!")
             break
 
