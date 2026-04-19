@@ -159,10 +159,16 @@ def display_header():
     print("-" * 60)
     print(f"{'No':<5}{'Category'.title():<15}{'Amount(in Rs)':>15}{'Type':^20}")
     print("-" * 60)
+    for i, transaction in enumerate(transactions, start=1):
+        print(f"{i:<5}", end="")
+        transaction.show()
 
-manager = Manager()
+    print("-" * 60)
 
-def main():
+def handle_sort():
+
+
+def show_menu():
     while True:
         print("\n========================")
         print("Simple Finance Manager")
@@ -179,62 +185,64 @@ def main():
 
         choice = get_valid_choice("Enter your choice: ", min_value = 1, max_value = 9)
 
-        if choice == 1:
-            category = input("Enter the category: ")
-            amount = get_valid_amount()
-            transaction_type = get_valid_type()
-            manager.add_transaction(category, amount, transaction_type)
-            print("Transaction added successfully!")
+        return choice
 
-        elif choice == 2:
-            transactions = manager.get_transactions()
-            if not transactions:
-                print("No transactions found!")
-                continue
+def handle_add():
+    category = input("Enter the category: ")
+    amount = get_valid_amount()
+    transaction_type = get_valid_type()
+    manager.add_transaction(category, amount, transaction_type)
+    print("Transaction added successfully!")
+
+def handle_view():
+    transactions = manager.get_transactions()
+    if not transactions:
+        print("No transactions found!")
+
+def handle_search():
+    category = input("Enter category to search: ")
+    result = manager.search_transactions(category)
+
+    if not result:
+        print("No transactions found!")
+        return
+
+
+def handle_sort():
+    order = input("Enter sorting order → 'asc' (low to high) or 'desc' (high to low): ")
+    sorted_list = manager.sort_transactions(order)
+
+
+manager = Manager()
+
+def main():
+    choice = show_menu()
+    if choice == 1:
+        handle_add()
+
+
+    elif choice == 2:
+        handle_view()
+        display_header()
+
+
+    elif choice == 3:
+        display_header()
+
+
+    elif choice == 4:
+        total_income, total_expense, net_balance = manager.net_balance()
+        print(f"Total income    : ₹{total_income:.2f}")
+        print(f"Total expense   : ₹{total_expense:.2f}")
+        print(f"Net balance     : ₹{net_balance:.2f}")
+
+    elif choice == 5:
+        transactions = manager.get_transactions()
+        if not transactions:
+            print("No transactions found!")
+
 
             display_header()
-
-            for i, transaction in enumerate(transactions, start=1):
-                print(f"{i:<5}", end="")
-                transaction.show()
-
-            print("-" * 60)
-
-        elif choice == 3:
-            category = input("Enter category to search: ")
-            result = manager.search_transactions(category)
-
-            if not result:
-                print("No transactions found!")
-                continue
-
-            display_header()
-
-            for i, transaction in enumerate(result, start=1):
-                print(f"{i:<5}", end="")
-                transaction.show()
-
-            print("-" * 60)
-
-        elif choice == 4:
-            total_income, total_expense, net_balance = manager.net_balance()
-            print(f"Total income    : ₹{total_income:.2f}")
-            print(f"Total expense   : ₹{total_expense:.2f}")
-            print(f"Net balance     : ₹{net_balance:.2f}")
-
-        elif choice == 5:
-            transactions = manager.get_transactions()
-            if not transactions:
-                print("No transactions found!")
-                continue
-
-            display_header()
-
-            for i, transaction in enumerate(transactions, start=1):
-                print(f"{i:<5}", end="")
-                transaction.show()
-
-            print("-" * 60)
 
             index = get_valid_choice("Enter transaction number to delete: ", 1, len(transactions))
 
@@ -245,22 +253,14 @@ def main():
                 print("Invalid selection!")
 
         elif choice == 6:
-            order = input("Enter sorting order → 'asc' (low to high) or 'desc' (high to low): ")
-            sorted_list = manager.sort_transactions(order)
-
             display_header()
-            for i, transaction in enumerate(sorted_list, start=1):
-                print(f"{i:<5}", end="")
-                transaction.show()
 
-            print("-" * 60)
 
         elif choice == 7:
             summary = manager.get_category_summary()
 
             if not summary:
                 print("No transactions found!")
-                continue
 
             print("-" * 60)
             print(f"{'Category':<20}{'Income':>15}{'Expense':>15}")
@@ -277,7 +277,6 @@ def main():
 
         elif choice == 9:
             print("Thank you for your time!")
-            break
 
 if __name__ == "__main__":
     main()
