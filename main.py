@@ -73,12 +73,11 @@ class Manager:
         return total_income, total_expense, net_balance
 
     def delete_transaction(self, index):
-        if index < 0 or index >= len(self.transactions):
-            return False
-
-        del self.transactions[index]
-        self.save_data()
-        return True
+        if 0 <= index < len(self.transactions):
+            del self.transactions[index]
+            self.save_data()
+            return True
+        return False
 
     def get_category_summary(self):
         summary = {}
@@ -155,128 +154,118 @@ def get_valid_choice(prompt, min_value = None, max_value = None):
         except ValueError:
             print(f"Please enter a value between {min_value} and {max_value}")
 
-def display_header():
+def display_transaction(transactions):
+
+    if not transactions:
+        print("No transactions found!")
+        return
+
     print("-" * 60)
     print(f"{'No':<5}{'Category'.title():<15}{'Amount(in Rs)':>15}{'Type':^20}")
     print("-" * 60)
+
     for i, transaction in enumerate(transactions, start=1):
         print(f"{i:<5}", end="")
         transaction.show()
 
     print("-" * 60)
 
-def handle_sort():
-
-
-def show_menu():
-    while True:
-        print("\n========================")
-        print("Simple Finance Manager")
-        print("========================")
-        print("\n1. Add a transaction")
-        print("2. View transactions")
-        print("3. Search transactions")
-        print("4. Net balance")
-        print("5. Delete transaction")
-        print("6. Sort transactions")
-        print("7. Category summary")
-        print("8. Clear transactions")
-        print("9. Exit")
-
-        choice = get_valid_choice("Enter your choice: ", min_value = 1, max_value = 9)
-
-        return choice
-
 def handle_add():
-    category = input("Enter the category: ")
+    category = input("Enter category: ")
     amount = get_valid_amount()
     transaction_type = get_valid_type()
     manager.add_transaction(category, amount, transaction_type)
-    print("Transaction added successfully!")
+    print("Transaction added!")
 
 def handle_view():
-    transactions = manager.get_transactions()
-    if not transactions:
-        print("No transactions found!")
+    display_transaction(manger.get_transactions())
 
 def handle_search():
     category = input("Enter category to search: ")
-    result = manager.search_transactions(category)
+    display_transaction(manger.get_transactions(category))
 
-    if not result:
+def handle_sort():
+    order = input("Enter sort order (asc or desc): ")
+    display_transaction(manger.sort_transactions(order))
+
+def handle_delete():
+    transactions = manager.get_transactions()
+    display_transaction(transactions)
+
+    if not transactions:
+        return
+
+    index = get_valid_choice("Enter index number to delete: ", 1, len(transactions))
+    if manger.delete_transaction(index -1):
+        print("Transaction deleted!")
+    else:
+        print("Invalid index!")
+
+def handle_summary():
+    summary = manager.get_category_summary()
+
+    if not summary:
         print("No transactions found!")
         return
 
+    print("-" * 60)
+    print(f"{'category':<20}{'Income':>15}{'Expense':>15}")
+    print("-" * 60)
 
-def handle_sort():
-    order = input("Enter sorting order → 'asc' (low to high) or 'desc' (high to low): ")
-    sorted_list = manager.sort_transactions(order)
+    for category, data in summary.items():
+        print(f"{category:<20}{data['income']:>15.2f}{data['expense']:>15.2f}")
+    print("-" * 60)
 
 
 manager = Manager()
 
 def main():
-    choice = show_menu()
-    if choice == 1:
-        handle_add()
+    while True:
+        print("\n========FINANCE MANAGER========")
+        print("1. Add transaction")
+        print("2. View transactions")
+        print("3. Search transactions")
+        print("4. Balance")
+        print("5. Delete transaction")
+        print("6. Sort transactions")
+        print("7. Summary of transactions")
+        print("8. Clear transaction history")
+        print("9. Exit")
 
+        choice = get_valid_choice("Enter your choice: ",1,9)
 
-    elif choice == 2:
-        handle_view()
-        display_header()
+        if choice == 1:
+            handle_add()
 
+        elif choice == 2:
+            handle_view()
 
-    elif choice == 3:
-        display_header()
+        elif choice == 3:
+            handle_search()
 
+        elif choice == 4:
+            income, expense, net_balance = manager.net_balance()
+            print(f"Income: ₹{income:.2f}")
+            print(f"Expense: ₹{expense:.2f}")
+            print(f"Net Balance: ₹{net_balance:.2f}")
 
-    elif choice == 4:
-        total_income, total_expense, net_balance = manager.net_balance()
-        print(f"Total income    : ₹{total_income:.2f}")
-        print(f"Total expense   : ₹{total_expense:.2f}")
-        print(f"Net balance     : ₹{net_balance:.2f}")
-
-    elif choice == 5:
-        transactions = manager.get_transactions()
-        if not transactions:
-            print("No transactions found!")
-
-
-            display_header()
-
-            index = get_valid_choice("Enter transaction number to delete: ", 1, len(transactions))
-
-            success = manager.delete_transaction(index - 1)
-            if success:
-                print("Transaction deleted successfully!")
-            else:
-                print("Invalid selection!")
+        elif choice == 5:
+            handle_delete()
 
         elif choice == 6:
-            display_header()
-
+            handle_sort()
 
         elif choice == 7:
-            summary = manager.get_category_summary()
-
-            if not summary:
-                print("No transactions found!")
-
-            print("-" * 60)
-            print(f"{'Category':<20}{'Income':>15}{'Expense':>15}")
-            print("-" * 60)
-
-            for category, data in summary.items():
-                print(f"{category:<20}{data['income']:>15.2f}{data['expense']:>15.2f}")
-            print("-" * 60)
+            handle_summary()
 
         elif choice == 8:
-            confirm = input("Are you sure you want to clear the data? (y/n): ").lower()
-            if confirm == "y":
-                manager.clear_data()
+            manager.clear_data()
+            print("Transactions cleared!")
 
         elif choice == 9:
-            print("Thank you for your time!")
+            print("Thank you for using this program!")
+            break
 
 if __name__ == "__main__":
     main()
+
