@@ -222,7 +222,7 @@ manager = Manager()
 def main():
     while True:
         print("\n========FINANCE MANAGER========")
-        print("1. Add transaction")
+        print("\n1. Add transaction")
         print("2. View transactions")
         print("3. Search transactions")
         print("4. Balance")
@@ -232,7 +232,7 @@ def main():
         print("8. Clear transaction history")
         print("9. Exit")
 
-        choice = get_valid_choice("Enter your choice: ",1,9)
+        choice = get_valid_choice("\nEnter your choice: ",1,9)
 
         if choice == 1:
             handle_add()
